@@ -1,0 +1,351 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Agentic Honeypot | AI Security Platform</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        /* Your existing CSS styles here */
+        /* ... (keep all your existing CSS) ... */
+    </style>
+</head>
+<body>
+    <!-- Your existing HTML structure here -->
+    <!-- ... (keep all your existing HTML) ... -->
+
+    <script>
+        // ==================== LOCAL MOCK API SERVICE ====================
+        // This simulates API responses without needing a separate server
+        
+        class MockAPIService {
+            constructor() {
+                this.baseURL = 'http://localhost:3001';
+                this.isLocalServerRunning = false;
+                this.checkLocalServer();
+            }
+            
+            async checkLocalServer() {
+                try {
+                    const response = await fetch(`${this.baseURL}/v1/status`, { 
+                        method: 'GET',
+                        signal: AbortSignal.timeout(1000) // 1 second timeout
+                    });
+                    this.isLocalServerRunning = response.ok;
+                } catch (error) {
+                    this.isLocalServerRunning = false;
+                }
+            }
+            
+            async scan(requestData) {
+                // If local server is running, use it
+                if (this.isLocalServerRunning) {
+                    return this.callRealAPI('/v1/scan', 'POST', requestData);
+                }
+                
+                // Otherwise, return mock data
+                return new Promise(resolve => {
+                    setTimeout(() => {
+                        resolve({
+                            status: 'success',
+                            scan_id: `scan_mock_${Date.now()}_${Math.floor(Math.random() * 1000)}`,
+                            timestamp: new Date().toISOString(),
+                            threats_detected: Math.floor(Math.random() * 5),
+                            results: {
+                                sql_injection: Math.random() > 0.7,
+                                xss: Math.random() > 0.7,
+                                csrf: Math.random() > 0.7,
+                                rate_limit_violation: Math.random() > 0.8,
+                                data_exfiltration: Math.random() > 0.9
+                            },
+                            security_score: Math.floor(Math.random() * 30) + 70,
+                            recommendations: [
+                                "Implement parameterized queries to prevent SQL injection",
+                                "Add CSRF tokens to all forms",
+                                "Enable rate limiting on sensitive endpoints",
+                                "Use Content Security Policy headers"
+                            ],
+                            response_time_ms: Math.floor(Math.random() * 200) + 100,
+                            note: "Using mock data. Start local server for real API calls."
+                        });
+                    }, 800);
+                });
+            }
+            
+            async callRealAPI(endpoint, method, data) {
+                try {
+                    const response = await fetch(`${this.baseURL}${endpoint}`, {
+                        method: method,
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'X-API-Source': 'AgenticHoneypot-UI'
+                        },
+                        body: JSON.stringify(data)
+                    });
+                    
+                    if (!response.ok) {
+                        throw new Error(`API Error: ${response.status}`);
+                    }
+                    
+                    return await response.json();
+                } catch (error) {
+                    console.error('API call failed:', error);
+                    throw error;
+                }
+            }
+        }
+        
+        // Initialize the mock API service
+        const apiService = new MockAPIService();
+        
+        // ==================== UPDATED API TEST FUNCTIONALITY ====================
+        document.addEventListener('DOMContentLoaded', function() {
+            // ... (your existing navigation code) ...
+            
+            // Update API endpoint field to use localhost
+            const apiEndpointField = document.getElementById('api-endpoint');
+            if (apiEndpointField) {
+                apiEndpointField.value = 'http://localhost:3001/v1/scan';
+            }
+            
+            // Enhanced API test button handler
+            const testApiBtn = document.getElementById('test-api-btn');
+            const clearFormBtn = document.getElementById('clear-form-btn');
+            const apiResponseContainer = document.getElementById('api-response-container');
+            const apiResponse = document.getElementById('api-response');
+            
+            if (testApiBtn) {
+                testApiBtn.addEventListener('click', async function() {
+                    const endpoint = document.getElementById('api-endpoint').value;
+                    const method = document.getElementById('request-method').value;
+                    const headersText = document.getElementById('request-headers').value;
+                    const bodyText = document.getElementById('request-body').value;
+                    
+                    // Show loading state
+                    const originalText = testApiBtn.innerHTML;
+                    testApiBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Testing API...';
+                    testApiBtn.disabled = true;
+                    
+                    try {
+                        // Parse request data
+                        let requestData = {};
+                        if (bodyText.trim()) {
+                            try {
+                                requestData = JSON.parse(bodyText);
+                            } catch (e) {
+                                throw new Error('Invalid JSON in request body');
+                            }
+                        }
+                        
+                        // Check if it's a localhost endpoint
+                        if (endpoint.includes('localhost') || endpoint.includes('127.0.0.1')) {
+                            // Use our mock API service
+                            const response = await apiService.scan(requestData);
+                            displayResponse(response);
+                        } else {
+                            // Try to call external API
+                            let headers = {};
+                            if (headersText.trim()) {
+                                try {
+                                    headers = JSON.parse(headersText);
+                                } catch (e) {
+                                    console.warn('Invalid headers JSON');
+                                }
+                            }
+                            
+                            const response = await fetch(endpoint, {
+                                method: method,
+                                headers: headers,
+                                body: ['POST', 'PUT', 'PATCH'].includes(method) ? JSON.stringify(requestData) : null
+                            });
+                            
+                            if (!response.ok) {
+                                throw new Error(`API returned ${response.status}: ${response.statusText}`);
+                            }
+                            
+                            const responseData = await response.json();
+                            displayResponse(responseData);
+                        }
+                        
+                    } catch (error) {
+                        console.error('API test failed:', error);
+                        
+                        // Show error in response
+                        const errorResponse = {
+                            status: 'error',
+                            message: error.message,
+                            timestamp: new Date().toISOString(),
+                            suggestion: 'Try using the local mock API at http://localhost:3001/v1/scan'
+                        };
+                        
+                        displayResponse(errorResponse);
+                    } finally {
+                        // Reset button
+                        testApiBtn.innerHTML = originalText;
+                        testApiBtn.disabled = false;
+                        
+                        // Scroll to response
+                        apiResponseContainer.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+                    }
+                });
+            }
+            
+            function displayResponse(data) {
+                apiResponse.textContent = JSON.stringify(data, null, 2);
+                apiResponseContainer.style.display = 'block';
+                
+                // Add some styling based on response status
+                if (data.status === 'error') {
+                    apiResponse.style.color = '#f44336';
+                    apiResponse.style.borderLeft = '4px solid #f44336';
+                } else {
+                    apiResponse.style.color = '';
+                    apiResponse.style.borderLeft = '4px solid #4caf50';
+                }
+            }
+            
+            if (clearFormBtn) {
+                clearFormBtn.addEventListener('click', function() {
+                    // Clear form but keep localhost endpoint
+                    document.getElementById('api-endpoint').value = 'http://localhost:3001/v1/scan';
+                    document.getElementById('request-method').value = 'POST';
+                    document.getElementById('request-headers').value = '{\n  "Content-Type": "application/json",\n  "Authorization": "Bearer your_api_key_here",\n  "X-API-Version": "1.0"\n}';
+                    document.getElementById('request-body').value = '{\n  "url": "https://example.com/login",\n  "scan_type": "full",\n  "timeout": 30,\n  "sensitivity": "high"\n}';
+                    
+                    // Hide response container
+                    apiResponseContainer.style.display = 'none';
+                });
+            }
+            
+            // Add server status indicator
+            const addServerStatusIndicator = () => {
+                const apiTestHeader = document.querySelector('#api-test-page .page-header');
+                if (apiTestHeader) {
+                    const statusIndicator = document.createElement('div');
+                    statusIndicator.className = 'status-indicator';
+                    statusIndicator.id = 'server-status-indicator';
+                    statusIndicator.innerHTML = `
+                        <div class="status-dot" id="server-status-dot"></div>
+                        <span>Local Server: <strong id="server-status-text">Checking...</strong></span>
+                        <button id="start-server-btn" style="margin-left: 15px; padding: 5px 10px; background: #00bcd4; color: white; border: none; border-radius: 4px; cursor: pointer;">
+                            <i class="fas fa-server"></i> Start Mock Server
+                        </button>
+                    `;
+                    apiTestHeader.appendChild(statusIndicator);
+                    
+                    // Check server status periodically
+                    setInterval(async () => {
+                        try {
+                            const response = await fetch('http://localhost:3001/v1/status', { 
+                                method: 'GET',
+                                signal: AbortSignal.timeout(1000)
+                            });
+                            if (response.ok) {
+                                document.getElementById('server-status-dot').className = 'status-dot online';
+                                document.getElementById('server-status-text').textContent = 'Running';
+                                apiService.isLocalServerRunning = true;
+                            }
+                        } catch (error) {
+                            document.getElementById('server-status-dot').className = 'status-dot offline';
+                            document.getElementById('server-status-text').textContent = 'Not Running';
+                            apiService.isLocalServerRunning = false;
+                        }
+                    }, 5000);
+                    
+                    // Start server button
+                    document.getElementById('start-server-btn').addEventListener('click', function() {
+                        alert('To start the local server:\n\n1. Create a file named "server.js" with the provided code\n2. Run: npm install express cors\n3. Run: node server.js\n\nCheck the console for instructions.');
+                    });
+                }
+            };
+            
+            // Add server status indicator when on API test page
+            const apiTestLink = document.getElementById('nav-api-test');
+            if (apiTestLink) {
+                apiTestLink.addEventListener('click', function() {
+                    setTimeout(addServerStatusIndicator, 100);
+                });
+            }
+        });
+    </script>
+    // Add this JavaScript at the end of your HTML file, before closing </body>
+<script>
+// Inline mock API using Service Workers (works without Node.js)
+if ('serviceWorker' in navigator) {
+    // Register a service worker to intercept API calls
+    navigator.serviceWorker.register('/sw.js').catch(console.error);
+}
+
+// Fallback: Mock API function that runs in the browser
+window.mockAPI = {
+    scan: function(data) {
+        return new Promise(resolve => {
+            setTimeout(() => {
+                resolve({
+                    status: 'success',
+                    scan_id: `scan_${Date.now()}_${Math.floor(Math.random() * 1000)}`,
+                    timestamp: new Date().toISOString(),
+                    threats_detected: Math.floor(Math.random() * 5),
+                    results: {
+                        sql_injection: Math.random() > 0.7,
+                        xss: Math.random() > 0.7,
+                        csrf: Math.random() > 0.7,
+                        rate_limit_violation: Math.random() > 0.8,
+                        data_exfiltration: Math.random() > 0.9
+                    },
+                    security_score: Math.floor(Math.random() * 30) + 70,
+                    recommendations: [
+                        "Implement parameterized queries",
+                        "Add CSRF tokens to forms",
+                        "Enable rate limiting on sensitive endpoints"
+                    ],
+                    response_time_ms: Math.floor(Math.random() * 200) + 100
+                });
+            }, 800);
+        });
+    }
+};
+
+// Update the API test button handler to use the mock API
+document.getElementById('test-api-btn').addEventListener('click', async function() {
+    const endpoint = document.getElementById('api-endpoint').value;
+    
+    // If it's trying to call localhost:3001, use our mock API instead
+    if (endpoint.includes('localhost:3001') || endpoint.includes('127.0.0.1:3001')) {
+        const btn = this;
+        const originalText = btn.innerHTML;
+        btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Testing API...';
+        btn.disabled = true;
+        
+        try {
+            const bodyText = document.getElementById('request-body').value;
+            let requestData = {};
+            
+            if (bodyText.trim()) {
+                try {
+                    requestData = JSON.parse(bodyText);
+                } catch (e) {
+                    requestData = { url: 'https://example.com' };
+                }
+            }
+            
+            const response = await window.mockAPI.scan(requestData);
+            
+            // Display response
+            document.getElementById('api-response').textContent = JSON.stringify(response, null, 2);
+            document.getElementById('api-response-container').style.display = 'block';
+        } catch (error) {
+            console.error('Mock API error:', error);
+        } finally {
+            btn.innerHTML = originalText;
+            btn.disabled = false;
+            document.getElementById('api-response-container').scrollIntoView({ behavior: 'smooth' });
+        }
+    } else {
+        // Original fetch code for external APIs
+        // ... (your existing fetch code)
+    }
+});
+</script>
+</body>
+</html>

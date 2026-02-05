@@ -7,10 +7,9 @@ from typing import Optional, Dict, Any, List
 import redis
 import json
 import logging
-
-from .config import settings
+from app.config import settings
 from .models import ConversationRequest, AgentResponse, APIError
-from .scam_detector import ScamDetector
+from .scam_detector import detect_scam as detect_scam_function  # CHANGED HERE
 from .agent import HoneypotAgent
 from .intelligence import IntelligenceExtractor
 from .callback import EvaluationCallback
@@ -23,6 +22,11 @@ app = FastAPI(
     description="AI-powered Agentic Honeypot for scam detection and engagement"
 )
 
+@app.post("/detect")
+async def detect_scam_endpoint(text: str):
+    result = detect_scam_function(text)
+    return result
+
 # CORS middleware
 app.add_middleware(
     CORSMiddleware,
@@ -33,10 +37,41 @@ app.add_middleware(
 )
 
 # Initialize components
-scam_detector = ScamDetector({
-    "MIN_SCAM_CONFIDENCE": settings.MIN_SCAM_CONFIDENCE,
-    "USE_LLM": True
-})
+# Create a simple detector wrapper
+def detect_scam_with_history(text: str, conversation_history=None):
+    result = detect_scam_function(text)
+    
+    # Enhance detection with conversation history if available
+    if conversation_history:
+        # Check all messages in conversation for scam indicators
+        total_score = 0
+        scam_keywords = ["blocked", "suspended", "verify", "upi", "otp", "bank", "account", "urgent"]
+        
+        for msg in conversation_history:
+            if isinstance(msg, dict) and msg.get('sender') == 'scammer':
+                msg_text = msg.get('text', '').lower()
+                total_score += sum(1 for k in scam_keywords if k in msg_text)
+        
+        current_score = sum(1 for k in scam_keywords if k in text.lower())
+        total_score += current_score
+        
+        # Adjust confidence based on conversation
+        enhanced_confidence = min(total_score / (len(scam_keywords) * 2), 1.0)
+        
+        return {
+            "is_scam": total_score >= 3,  # Lower threshold with context
+            "confidence": enhanced_confidence,
+            "scam_type": result["scamType"],
+            "original_result": result
+        }
+    
+    # Return basic detection without history
+    return {
+        "is_scam": result["isScam"],
+        "confidence": result["confidence"],
+        "scam_type": result["scamType"]
+    }
+
 agent = HoneypotAgent({
     "USE_LLM": True,
     "AGENT_PERSONAS": settings.AGENT_PERSONAS
@@ -48,8 +83,14 @@ callback_service = EvaluationCallback()
 redis_client = redis.Redis.from_url(settings.REDIS_URL, decode_responses=True)
 
 # Setup logging
-logger = setup_logging()
-
+try:
+    logger = setup_logging()
+except FileNotFoundError:
+    # Create logs directory and retry
+    import os
+    os.makedirs('logs', exist_ok=True)
+    logger = setup_logging()
+    
 @app.middleware("http")
 async def log_requests(request, call_next):
     """Log all requests"""
@@ -137,8 +178,8 @@ async def process_message(
         
         logger.info(f"Processing message for session {session_id}, message length: {len(message_text)}")
         
-        # 1. Detect scam intent
-        detection_result = scam_detector.detect(message_text, conversation_history)
+        # 1. Detect scam intent - CHANGED THIS LINE
+        detection_result = detect_scam_with_history(message_text, conversation_history)
         
         # 2. Extract intelligence
         intelligence_result = intelligence_extractor.extract(message_text, conversation_history)

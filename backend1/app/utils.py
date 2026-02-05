@@ -1,82 +1,127 @@
-import hashlib
+import os
+import sys
+import json
 import time
-from typing import Dict, Any
+import hashlib
 import logging
-from datetime import datetime
-from functools import wraps
+import inspect
+from typing import Dict, Any, List, Optional, Callable, Union
+from datetime import datetime, timedelta
+from functools import wraps, lru_cache
+from pathlib import Path
+from logging.handlers import RotatingFileHandler
+import re
+import random
+import string
 
 def setup_logging():
     """Setup application logging"""
+    
+    # Create logs directory if it doesn't exist
+    logs_dir = 'logs'
+    if not os.path.exists(logs_dir):
+        os.makedirs(logs_dir)
+    
+    # Configure logging
     logging.basicConfig(
         level=logging.INFO,
         format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
         handlers=[
-            logging.FileHandler('logs/app.log'),
+            logging.FileHandler(os.path.join(logs_dir, 'app.log')),
             logging.StreamHandler()
         ]
     )
+    
     return logging.getLogger(__name__)
 
-def validate_api_key(api_key: str, expected_key: str) -> bool:
-    """Validate API key"""
-    if not api_key:
-        return False
-    return api_key == expected_key
-
-class RateLimiter:
-    def __init__(self, max_requests: int = 100, window_seconds: int = 60):
-        self.max_requests = max_requests
-        self.window_seconds = window_seconds
-        self.requests = {}
+def rate_limiter(max_requests: int = 100, window_seconds: int = 3600):
+    """Rate limiter decorator"""
+    requests = {}
     
-    def check_limit(self, api_key: str) -> bool:
-        """Check if request is within rate limit"""
-        current_time = time.time()
-        
-        if api_key not in self.requests:
-            self.requests[api_key] = []
-        
-        # Remove old requests
-        self.requests[api_key] = [
-            req_time for req_time in self.requests[api_key]
-            if current_time - req_time < self.window_seconds
-        ]
-        
-        # Check limit
-        if len(self.requests[api_key]) >= self.max_requests:
-            return False
-        
-        # Add current request
-        self.requests[api_key].append(current_time)
-        return True
+    def decorator(func):
+        @wraps(func)
+        def wrapper(api_key: str, *args, **kwargs):
+            current_time = time.time()
+            
+            # Clean old entries
+            keys_to_delete = []
+            for key, (count, timestamp) in requests.items():
+                if current_time - timestamp > window_seconds:
+                    keys_to_delete.append(key)
+            
+            for key in keys_to_delete:
+                del requests[key]
+            
+            # Check rate limit
+            if api_key in requests:
+                count, timestamp = requests[api_key]
+                if current_time - timestamp < window_seconds and count >= max_requests:
+                    return False
+                requests[api_key] = (count + 1, current_time)
+            else:
+                requests[api_key] = (1, current_time)
+            
+            return True
+        return wrapper
+    return decorator
 
-# Initialize rate limiter
-rate_limiter = RateLimiter(max_requests=100, window_seconds=60)
-
-def generate_session_id() -> str:
-    """Generate unique session ID"""
-    return hashlib.sha256(
-        f"{datetime.now().isoformat()}{time.time()}".encode()
-    ).hexdigest()[:20]
+def validate_api_key(api_key: Optional[str], valid_key: str) -> bool:
+    """Validate API key"""
+    if not api_key or not valid_key:
+        return False
+    return api_key == valid_key
 
 def sanitize_text(text: str) -> str:
     """Sanitize input text"""
     if not text:
         return ""
     
-    # Remove potentially dangerous characters
-    sanitized = text.replace('\x00', '').replace('\r', '').replace('\n', ' ')
+    # Remove excessive whitespace
+    text = ' '.join(text.strip().split())
     
-    # Limit length
-    max_length = 1000
-    if len(sanitized) > max_length:
-        sanitized = sanitized[:max_length] + "..."
+    # Optional: Remove potentially harmful characters
+    # text = re.sub(r'[<>{}[\]]', '', text)
     
-    return sanitized.strip()
+    return text
 
-def format_timestamp(timestamp: int) -> str:
-    """Format epoch timestamp to readable date"""
+def generate_session_id(length: int = 16) -> str:
+    """Generate a random session ID"""
+    characters = string.ascii_letters + string.digits
+    return ''.join(random.choice(characters) for _ in range(length))
+
+def format_timestamp(timestamp: Optional[float] = None) -> str:
+    """Format timestamp to readable string"""
+    if timestamp is None:
+        timestamp = time.time()
+    return datetime.fromtimestamp(timestamp).strftime('%Y-%m-%d %H:%M:%S')
+
+def safe_json_loads(json_str: str, default: Any = None) -> Any:
+    """Safely parse JSON string"""
     try:
-        return datetime.fromtimestamp(timestamp / 1000).strftime('%Y-%m-%d %H:%M:%S')
-    except:
-        return str(timestamp)
+        return json.loads(json_str)
+    except (json.JSONDecodeError, TypeError):
+        return default
+
+def calculate_confidence_score(keywords_found: List[str], total_keywords: int) -> float:
+    """Calculate confidence score for scam detection"""
+    score = len(keywords_found) / total_keywords
+    return min(score, 1.0)
+
+def is_valid_url(url: str) -> bool:
+    """Check if string is a valid URL"""
+    pattern = re.compile(
+        r'^(https?://)?'  # http:// or https://
+        r'([A-Z0-9-]+\.)+[A-Z]{2,}'  # domain
+        r'(:\d+)?'  # port
+        r'(/.*)?$',  # path
+        re.IGNORECASE
+    )
+    return bool(pattern.match(url))
+
+def mask_sensitive_info(text: str) -> str:
+    """Mask sensitive information like phone numbers, emails"""
+    # Mask phone numbers (Indian format)
+    text = re.sub(r'\b\d{10}\b', 'XXXXXXXXXX', text)
+    # Mask email addresses
+    text = re.sub(r'\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Z|a-z]{2,}\b', '***@***.***', text)
+    return text
