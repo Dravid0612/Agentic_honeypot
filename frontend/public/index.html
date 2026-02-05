@@ -6,114 +6,1339 @@
     <title>Agentic Honeypot | AI Security Platform</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
-        /* Your existing CSS styles here */
-        /* ... (keep all your existing CSS) ... */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        :root {
+            --primary: #1a237e;
+            --primary-light: #534bae;
+            --primary-dark: #000051;
+            --secondary: #00bcd4;
+            --secondary-light: #62efff;
+            --secondary-dark: #008ba3;
+            --danger: #f44336;
+            --warning: #ff9800;
+            --success: #4caf50;
+            --gray-light: #f5f5f5;
+            --gray: #9e9e9e;
+            --gray-dark: #616161;
+            --text: #212121;
+            --text-light: #757575;
+            --white: #ffffff;
+            --shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+            --radius: 8px;
+            --transition: all 0.3s ease;
+        }
+
+        body {
+            background-color: #f8f9fa;
+            color: var(--text);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* Header Styles */
+        header {
+            background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+            color: white;
+            padding: 1.2rem 2rem;
+            box-shadow: var(--shadow);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .logo i {
+            font-size: 1.8rem;
+            color: var(--secondary-light);
+        }
+
+        .logo h1 {
+            font-size: 1.8rem;
+            font-weight: 600;
+        }
+
+        .logo span {
+            color: var(--secondary-light);
+        }
+
+        .logo p {
+            font-size: 0.9rem;
+            opacity: 0.9;
+        }
+
+        /* Navigation */
+        nav ul {
+            display: flex;
+            list-style: none;
+            gap: 1.5rem;
+        }
+
+        nav a {
+            color: white;
+            text-decoration: none;
+            font-weight: 500;
+            padding: 0.5rem 0.8rem;
+            border-radius: var(--radius);
+            transition: var(--transition);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        nav a:hover {
+            background-color: rgba(255, 255, 255, 0.15);
+        }
+
+        nav a.active {
+            background-color: rgba(255, 255, 255, 0.2);
+            font-weight: 600;
+        }
+
+        .get-started-btn {
+            background-color: var(--secondary);
+            color: var(--primary-dark);
+            padding: 0.6rem 1.5rem;
+            border-radius: 30px;
+            font-weight: 600;
+            transition: var(--transition);
+        }
+
+        .get-started-btn:hover {
+            background-color: var(--secondary-light);
+            transform: translateY(-2px);
+        }
+
+        /* Main Content */
+        .container {
+            flex: 1;
+            padding: 2rem;
+            max-width: 1400px;
+            margin: 0 auto;
+            width: 100%;
+        }
+
+        .page-content {
+            display: none;
+            animation: fadeIn 0.5s ease;
+        }
+
+        .page-content.active {
+            display: block;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* Dashboard Page */
+        .page-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 2rem;
+        }
+
+        .page-header h2 {
+            font-size: 1.8rem;
+            color: var(--primary);
+        }
+
+        .page-header p {
+            color: var(--text-light);
+            margin-top: 0.5rem;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .stat-card {
+            background-color: white;
+            border-radius: var(--radius);
+            padding: 1.5rem;
+            box-shadow: var(--shadow);
+            display: flex;
+            flex-direction: column;
+            transition: var(--transition);
+        }
+
+        .stat-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 16px rgba(0, 0, 0, 0.1);
+        }
+
+        .stat-card i {
+            font-size: 2rem;
+            margin-bottom: 1rem;
+        }
+
+        .stat-card.primary i {
+            color: var(--primary);
+        }
+
+        .stat-card.secondary i {
+            color: var(--secondary);
+        }
+
+        .stat-card.warning i {
+            color: var(--warning);
+        }
+
+        .stat-card.danger i {
+            color: var(--danger);
+        }
+
+        .stat-card .value {
+            font-size: 2.2rem;
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+        }
+
+        .stat-card .label {
+            color: var(--text-light);
+            font-size: 0.9rem;
+        }
+
+        .charts-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(450px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .chart-card {
+            background-color: white;
+            border-radius: var(--radius);
+            padding: 1.5rem;
+            box-shadow: var(--shadow);
+        }
+
+        .chart-card h3 {
+            color: var(--primary);
+            margin-bottom: 1rem;
+            font-size: 1.2rem;
+        }
+
+        .chart-placeholder {
+            height: 250px;
+            background-color: var(--gray-light);
+            border-radius: var(--radius);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            color: var(--gray);
+            flex-direction: column;
+            gap: 1rem;
+        }
+
+        .activity-log {
+            background-color: white;
+            border-radius: var(--radius);
+            padding: 1.5rem;
+            box-shadow: var(--shadow);
+        }
+
+        .activity-log h3 {
+            color: var(--primary);
+            margin-bottom: 1rem;
+            font-size: 1.2rem;
+        }
+
+        .log-table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        .log-table th {
+            text-align: left;
+            padding: 0.8rem 1rem;
+            border-bottom: 2px solid var(--gray-light);
+            color: var(--primary);
+            font-weight: 600;
+        }
+
+        .log-table td {
+            padding: 0.8rem 1rem;
+            border-bottom: 1px solid var(--gray-light);
+        }
+
+        .log-table tr:last-child td {
+            border-bottom: none;
+        }
+
+        .status-badge {
+            padding: 0.3rem 0.8rem;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            display: inline-block;
+        }
+
+        .status-badge.threat {
+            background-color: rgba(244, 67, 54, 0.1);
+            color: var(--danger);
+        }
+
+        .status-badge.safe {
+            background-color: rgba(76, 175, 80, 0.1);
+            color: var(--success);
+        }
+
+        .status-badge.monitoring {
+            background-color: rgba(255, 152, 0, 0.1);
+            color: var(--warning);
+        }
+
+        /* API Test Page */
+        .api-test-container {
+            background-color: white;
+            border-radius: var(--radius);
+            padding: 2rem;
+            box-shadow: var(--shadow);
+        }
+
+        .api-form {
+            display: flex;
+            flex-direction: column;
+            gap: 1.5rem;
+            max-width: 800px;
+        }
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+
+        .form-group label {
+            font-weight: 600;
+            color: var(--primary);
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .form-group input,
+        .form-group select,
+        .form-group textarea {
+            padding: 0.8rem 1rem;
+            border: 1px solid #ddd;
+            border-radius: var(--radius);
+            font-size: 1rem;
+            transition: var(--transition);
+        }
+
+        .form-group input:focus,
+        .form-group select:focus,
+        .form-group textarea:focus {
+            outline: none;
+            border-color: var(--secondary);
+            box-shadow: 0 0 0 2px rgba(0, 188, 212, 0.2);
+        }
+
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1.5rem;
+        }
+
+        .api-actions {
+            display: flex;
+            gap: 1rem;
+            margin-top: 1rem;
+        }
+
+        .btn {
+            padding: 0.8rem 1.8rem;
+            border: none;
+            border-radius: var(--radius);
+            font-weight: 600;
+            cursor: pointer;
+            transition: var(--transition);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .btn-primary {
+            background-color: var(--primary);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background-color: var(--primary-dark);
+        }
+
+        .btn-secondary {
+            background-color: var(--secondary);
+            color: var(--primary-dark);
+        }
+
+        .btn-secondary:hover {
+            background-color: var(--secondary-dark);
+            color: white;
+        }
+
+        .response-container {
+            margin-top: 2rem;
+            padding: 1.5rem;
+            background-color: #f8f9fa;
+            border-radius: var(--radius);
+            border-left: 4px solid var(--secondary);
+        }
+
+        .response-container h4 {
+            color: var(--primary);
+            margin-bottom: 1rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .response-box {
+            background-color: white;
+            border-radius: var(--radius);
+            padding: 1.5rem;
+            font-family: 'Courier New', monospace;
+            white-space: pre-wrap;
+            max-height: 300px;
+            overflow-y: auto;
+            border: 1px solid #eee;
+            font-size: 0.9rem;
+        }
+
+        /* Documentation Page */
+        .docs-container {
+            display: grid;
+            grid-template-columns: 280px 1fr;
+            gap: 2rem;
+        }
+
+        .docs-sidebar {
+            background-color: white;
+            border-radius: var(--radius);
+            padding: 1.5rem;
+            box-shadow: var(--shadow);
+            height: fit-content;
+            position: sticky;
+            top: 2rem;
+        }
+
+        .docs-sidebar h3 {
+            color: var(--primary);
+            margin-bottom: 1.2rem;
+            font-size: 1.2rem;
+        }
+
+        .docs-nav ul {
+            list-style: none;
+        }
+
+        .docs-nav li {
+            margin-bottom: 0.8rem;
+        }
+
+        .docs-nav a {
+            color: var(--text);
+            text-decoration: none;
+            padding: 0.5rem 0.8rem;
+            border-radius: var(--radius);
+            display: block;
+            transition: var(--transition);
+        }
+
+        .docs-nav a:hover,
+        .docs-nav a.active {
+            background-color: var(--gray-light);
+            color: var(--primary);
+        }
+
+        .docs-content {
+            background-color: white;
+            border-radius: var(--radius);
+            padding: 2rem;
+            box-shadow: var(--shadow);
+        }
+
+        .docs-section {
+            margin-bottom: 2.5rem;
+        }
+
+        .docs-section h2 {
+            color: var(--primary);
+            margin-bottom: 1rem;
+            padding-bottom: 0.5rem;
+            border-bottom: 2px solid var(--gray-light);
+        }
+
+        .docs-section h3 {
+            color: var(--primary);
+            margin: 1.5rem 0 0.8rem 0;
+        }
+
+        .docs-section p {
+            margin-bottom: 1rem;
+            line-height: 1.6;
+        }
+
+        .code-block {
+            background-color: #2d2d2d;
+            color: #f8f8f2;
+            padding: 1.5rem;
+            border-radius: var(--radius);
+            font-family: 'Courier New', monospace;
+            margin: 1rem 0;
+            overflow-x: auto;
+            font-size: 0.9rem;
+        }
+
+        /* API Online Page */
+        .api-status-container {
+            background-color: white;
+            border-radius: var(--radius);
+            padding: 2rem;
+            box-shadow: var(--shadow);
+        }
+
+        .api-status-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 2rem;
+        }
+
+        .status-indicator {
+            display: flex;
+            align-items: center;
+            gap: 0.8rem;
+        }
+
+        .status-dot {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+        }
+
+        .status-dot.online {
+            background-color: var(--success);
+            box-shadow: 0 0 10px rgba(76, 175, 80, 0.5);
+        }
+
+        .status-dot.offline {
+            background-color: var(--danger);
+            box-shadow: 0 0 10px rgba(244, 67, 54, 0.5);
+        }
+
+        .status-dot.maintenance {
+            background-color: var(--warning);
+            box-shadow: 0 0 10px rgba(255, 152, 0, 0.5);
+        }
+
+        .api-services {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 1.5rem;
+        }
+
+        .service-card {
+            background-color: #f8f9fa;
+            border-radius: var(--radius);
+            padding: 1.5rem;
+            border-left: 4px solid var(--primary);
+            transition: var(--transition);
+        }
+
+        .service-card:hover {
+            background-color: #f0f2f5;
+        }
+
+        .service-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1rem;
+        }
+
+        .service-name {
+            font-weight: 600;
+            color: var(--primary);
+        }
+
+        .service-status {
+            font-size: 0.8rem;
+            font-weight: 600;
+            padding: 0.3rem 0.8rem;
+            border-radius: 20px;
+        }
+
+        .status-up {
+            background-color: rgba(76, 175, 80, 0.1);
+            color: var(--success);
+        }
+
+        .status-down {
+            background-color: rgba(244, 67, 54, 0.1);
+            color: var(--danger);
+        }
+
+        .service-desc {
+            color: var(--text-light);
+            font-size: 0.9rem;
+            line-height: 1.5;
+        }
+
+        .api-keys {
+            margin-top: 2rem;
+            background-color: #f8f9fa;
+            border-radius: var(--radius);
+            padding: 1.5rem;
+        }
+
+        .api-key-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 1rem;
+            background-color: white;
+            border-radius: var(--radius);
+            margin-bottom: 1rem;
+        }
+
+        .key-info h4 {
+            color: var(--primary);
+            margin-bottom: 0.3rem;
+        }
+
+        .key-info p {
+            color: var(--text-light);
+            font-size: 0.9rem;
+        }
+
+        .key-value {
+            font-family: 'Courier New', monospace;
+            background-color: #2d2d2d;
+            color: #f8f8f2;
+            padding: 0.5rem 1rem;
+            border-radius: var(--radius);
+            font-size: 0.9rem;
+            word-break: break-all;
+        }
+
+        /* Footer */
+        footer {
+            background-color: var(--primary-dark);
+            color: white;
+            padding: 2rem;
+            text-align: center;
+            margin-top: 2rem;
+        }
+
+        .footer-content {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .footer-links {
+            display: flex;
+            justify-content: center;
+            gap: 2rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .footer-links a {
+            color: var(--secondary-light);
+            text-decoration: none;
+            transition: var(--transition);
+        }
+
+        .footer-links a:hover {
+            color: white;
+        }
+
+        .copyright {
+            color: var(--gray);
+            font-size: 0.9rem;
+        }
+
+        /* Server Status Indicator */
+        .server-status-indicator {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 10px 15px;
+            background: rgba(255, 255, 255, 0.9);
+            border-radius: var(--radius);
+            margin-top: 1rem;
+            border: 1px solid #e0e0e0;
+        }
+
+        .server-status-indicator .status-dot {
+            width: 10px;
+            height: 10px;
+        }
+
+        /* Responsive */
+        @media (max-width: 1024px) {
+            .charts-container {
+                grid-template-columns: 1fr;
+            }
+            
+            .docs-container {
+                grid-template-columns: 1fr;
+            }
+            
+            .docs-sidebar {
+                position: static;
+            }
+        }
+
+        @media (max-width: 768px) {
+            header {
+                flex-direction: column;
+                gap: 1.5rem;
+                padding: 1.5rem;
+            }
+            
+            nav ul {
+                flex-wrap: wrap;
+                justify-content: center;
+            }
+            
+            .form-row {
+                grid-template-columns: 1fr;
+            }
+            
+            .api-services {
+                grid-template-columns: 1fr;
+            }
+            
+            .api-key-item {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 1rem;
+            }
+            
+            .footer-links {
+                flex-direction: column;
+                gap: 1rem;
+            }
+            
+            .page-header {
+                flex-direction: column;
+                gap: 1rem;
+                align-items: flex-start;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .container {
+                padding: 1.5rem 1rem;
+            }
+            
+            .stats-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .charts-container {
+                grid-template-columns: 1fr;
+            }
+            
+            .api-actions {
+                flex-direction: column;
+            }
+            
+            .btn {
+                width: 100%;
+                justify-content: center;
+            }
+        }
+
+        /* Loading spinner */
+        .spinner {
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
     </style>
 </head>
 <body>
-    <!-- Your existing HTML structure here -->
-    <!-- ... (keep all your existing HTML) ... -->
+    <!-- Header -->
+    <header>
+        <div class="logo">
+            <i class="fas fa-shield-alt"></i>
+            <div>
+                <h1>Agentic <span>Honeypot</span></h1>
+                <p>AI Security Platform</p>
+            </div>
+        </div>
+        
+        <nav>
+            <ul>
+                <li><a href="#" id="nav-dashboard" class="active"><i class="fas fa-tachometer-alt"></i> Dashboard</a></li>
+                <li><a href="#" id="nav-api-test"><i class="fas fa-vial"></i> API Test</a></li>
+                <li><a href="#" id="nav-documentation"><i class="fas fa-book"></i> Documentation</a></li>
+                <li><a href="#" id="nav-api-online"><i class="fas fa-plug"></i> API Online</a></li>
+                <li><a href="#" id="nav-get-started" class="get-started-btn"><i class="fas fa-rocket"></i> Get Started</a></li>
+            </ul>
+        </nav>
+    </header>
+
+    <!-- Main Content Container -->
+    <main class="container">
+        <!-- Dashboard Page -->
+        <section id="dashboard-page" class="page-content active">
+            <div class="page-header">
+                <div>
+                    <h2>Security Dashboard</h2>
+                    <p>Real-time monitoring of AI security threats and system status</p>
+                </div>
+                <div class="status-indicator">
+                    <div class="status-dot online"></div>
+                    <span>System Status: <strong>Online</strong></span>
+                </div>
+            </div>
+
+            <div class="stats-grid">
+                <div class="stat-card primary">
+                    <i class="fas fa-bug"></i>
+                    <div class="value">1,247</div>
+                    <div class="label">Threats Detected</div>
+                </div>
+                <div class="stat-card secondary">
+                    <i class="fas fa-shield-alt"></i>
+                    <div class="value">98.7%</div>
+                    <div class="label">Blocked Attacks</div>
+                </div>
+                <div class="stat-card warning">
+                    <i class="fas fa-clock"></i>
+                    <div class="value">43</div>
+                    <div class="label">Active Monitoring</div>
+                </div>
+                <div class="stat-card danger">
+                    <i class="fas fa-exclamation-triangle"></i>
+                    <div class="value">12</div>
+                    <div class="label">Critical Alerts</div>
+                </div>
+            </div>
+
+            <div class="charts-container">
+                <div class="chart-card">
+                    <h3>Threat Activity (Last 24 Hours)</h3>
+                    <div class="chart-placeholder">
+                        <i class="fas fa-chart-line" style="font-size: 3rem;"></i>
+                        <span>Threat activity visualization chart</span>
+                    </div>
+                </div>
+                <div class="chart-card">
+                    <h3>Attack Sources by Region</h3>
+                    <div class="chart-placeholder">
+                        <i class="fas fa-globe-americas" style="font-size: 3rem;"></i>
+                        <span>Geographical attack distribution</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="activity-log">
+                <h3>Recent Security Events</h3>
+                <table class="log-table">
+                    <thead>
+                        <tr>
+                            <th>Time</th>
+                            <th>Event Type</th>
+                            <th>Source IP</th>
+                            <th>Severity</th>
+                            <th>Status</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>14:32:05</td>
+                            <td>SQL Injection Attempt</td>
+                            <td>192.168.45.23</td>
+                            <td><span class="status-badge threat">High</span></td>
+                            <td><span class="status-badge safe">Blocked</span></td>
+                        </tr>
+                        <tr>
+                            <td>14:28:41</td>
+                            <td>Malware Upload</td>
+                            <td>10.0.2.15</td>
+                            <td><span class="status-badge threat">Critical</span></td>
+                            <td><span class="status-badge safe">Blocked</span></td>
+                        </tr>
+                        <tr>
+                            <td>14:15:12</td>
+                            <td>Brute Force Attack</td>
+                            <td>203.0.113.5</td>
+                            <td><span class="status-badge threat">Medium</span></td>
+                            <td><span class="status-badge safe">Blocked</span></td>
+                        </tr>
+                        <tr>
+                            <td>13:58:33</td>
+                            <td>API Rate Limit Exceeded</td>
+                            <td>198.51.100.22</td>
+                            <td><span class="status-badge monitoring">Low</span></td>
+                            <td><span class="status-badge monitoring">Monitoring</span></td>
+                        </tr>
+                        <tr>
+                            <td>13:42:17</td>
+                            <td>Suspicious Pattern Detected</td>
+                            <td>172.16.0.45</td>
+                            <td><span class="status-badge monitoring">Medium</span></td>
+                            <td><span class="status-badge monitoring">Investigating</span></td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </section>
+
+        <!-- API Test Page -->
+        <section id="api-test-page" class="page-content">
+            <div class="page-header">
+                <div>
+                    <h2>API Test Console</h2>
+                    <p>Test and validate your API endpoints with real-time security scanning</p>
+                    <div id="server-status-indicator" class="server-status-indicator">
+                        <div class="status-dot offline" id="server-status-dot"></div>
+                        <span>Local Server: <strong id="server-status-text">Checking...</strong></span>
+                        <button id="start-server-btn" class="btn-secondary" style="padding: 5px 10px; font-size: 0.9rem; margin-left: auto;">
+                            <i class="fas fa-server"></i> Start Server Guide
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="api-test-container">
+                <form class="api-form" id="api-test-form">
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="api-endpoint"><i class="fas fa-link"></i> API Endpoint</label>
+                            <input type="text" id="api-endpoint" value="http://localhost:3001/v1/scan" placeholder="Enter API endpoint URL">
+                        </div>
+                        <div class="form-group">
+                            <label for="request-method"><i class="fas fa-exchange-alt"></i> HTTP Method</label>
+                            <select id="request-method">
+                                <option value="GET">GET</option>
+                                <option value="POST" selected>POST</option>
+                                <option value="PUT">PUT</option>
+                                <option value="DELETE">DELETE</option>
+                                <option value="PATCH">PATCH</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="request-headers"><i class="fas fa-heading"></i> Request Headers</label>
+                        <textarea id="request-headers" rows="3">{
+  "Content-Type": "application/json",
+  "Authorization": "Bearer your_api_key_here",
+  "X-API-Version": "1.0"
+}</textarea>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="request-body"><i class="fas fa-code"></i> Request Body</label>
+                        <textarea id="request-body" rows="6">{
+  "url": "https://example.com/login",
+  "scan_type": "full",
+  "timeout": 30,
+  "sensitivity": "high"
+}</textarea>
+                    </div>
+
+                    <div class="api-actions">
+                        <button type="button" id="test-api-btn" class="btn btn-primary">
+                            <i class="fas fa-play"></i> Test API
+                        </button>
+                        <button type="button" id="clear-form-btn" class="btn btn-secondary">
+                            <i class="fas fa-eraser"></i> Clear
+                        </button>
+                    </div>
+                </form>
+
+                <div class="response-container" id="api-response-container" style="display: none;">
+                    <h4><i class="fas fa-server"></i> API Response</h4>
+                    <div class="response-box" id="api-response"></div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Documentation Page -->
+        <section id="documentation-page" class="page-content">
+            <div class="page-header">
+                <div>
+                    <h2>Documentation</h2>
+                    <p>Complete guide to using the Agentic Honeypot AI Security Platform</p>
+                </div>
+            </div>
+
+            <div class="docs-container">
+                <div class="docs-sidebar">
+                    <h3>Contents</h3>
+                    <nav class="docs-nav">
+                        <ul>
+                            <li><a href="#getting-started" class="docs-nav-link active">Getting Started</a></li>
+                            <li><a href="#api-reference" class="docs-nav-link">API Reference</a></li>
+                            <li><a href="#security-features" class="docs-nav-link">Security Features</a></li>
+                            <li><a href="#best-practices" class="docs-nav-link">Best Practices</a></li>
+                            <li><a href="#troubleshooting" class="docs-nav-link">Troubleshooting</a></li>
+                        </ul>
+                    </nav>
+                </div>
+
+                <div class="docs-content">
+                    <div class="docs-section" id="getting-started">
+                        <h2>Getting Started</h2>
+                        <p>Welcome to the Agentic Honeypot AI Security Platform. This platform provides advanced security monitoring for AI systems and APIs.</p>
+                        
+                        <h3>Quick Start</h3>
+                        <p>To begin using our security platform, follow these steps:</p>
+                        <ol>
+                            <li>Sign up for an account and obtain your API key</li>
+                            <li>Integrate our SDK into your application</li>
+                            <li>Configure security rules and monitoring parameters</li>
+                            <li>Start monitoring security events in real-time</li>
+                        </ol>
+                        
+                        <h3>Integration Example</h3>
+                        <div class="code-block">
+// JavaScript SDK Integration
+import AgenticHoneypot from '@agentic-honeypot/sdk';
+
+const client = new AgenticHoneypot({
+  apiKey: 'your-api-key-here',
+  environment: 'production',
+  logLevel: 'info'
+});
+
+// Start monitoring
+client.monitor('/api/sensitive-endpoint', {
+  threatDetection: true,
+  rateLimiting: true,
+  anomalyDetection: true
+});
+                        </div>
+                    </div>
+
+                    <div class="docs-section" id="api-reference">
+                        <h2>API Reference</h2>
+                        <p>Our API provides endpoints for security scanning, threat detection, and monitoring.</p>
+                        
+                        <h3>Scan Endpoint</h3>
+                        <p><strong>POST /v1/scan</strong> - Scan a URL or endpoint for security vulnerabilities.</p>
+                        
+                        <div class="code-block">
+// Request example
+{
+  "url": "https://yourapp.com/login",
+  "scan_type": "comprehensive",
+  "timeout": 60,
+  "sensitivity": "high"
+}
+
+// Response example
+{
+  "scan_id": "scan_abc123xyz",
+  "status": "completed",
+  "threats_found": 3,
+  "results": {
+    "sql_injection": true,
+    "xss": false,
+    "csrf": true,
+    "rate_limit_violation": false
+  },
+  "recommendations": ["Implement parameterized queries", "Add CSRF tokens"]
+}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- API Online Page -->
+        <section id="api-online-page" class="page-content">
+            <div class="page-header">
+                <div>
+                    <h2>API Status & Online Services</h2>
+                    <p>Real-time status of all API endpoints and services</p>
+                </div>
+                <div class="status-indicator">
+                    <div class="status-dot online"></div>
+                    <span>Overall Status: <strong>Operational</strong></span>
+                </div>
+            </div>
+
+            <div class="api-status-container">
+                <div class="api-status-header">
+                    <h3>Service Status</h3>
+                    <div class="status-indicator">
+                        <div class="status-dot online"></div>
+                        <span>Last Updated: <span id="last-updated">Just now</span></span>
+                    </div>
+                </div>
+
+                <div class="api-services">
+                    <div class="service-card">
+                        <div class="service-header">
+                            <div class="service-name">Security Scanning API</div>
+                            <div class="service-status status-up">Operational</div>
+                        </div>
+                        <div class="service-desc">
+                            Endpoint for scanning URLs and APIs for security vulnerabilities. Provides comprehensive threat detection.
+                        </div>
+                    </div>
+                    <div class="service-card">
+                        <div class="service-header">
+                            <div class="service-name">Threat Intelligence</div>
+                            <div class="service-status status-up">Operational</div>
+                        </div>
+                        <div class="service-desc">
+                            Real-time threat intelligence feeds and attack pattern analysis. Updates every 5 minutes.
+                        </div>
+                    </div>
+                    <div class="service-card">
+                        <div class="service-header">
+                            <div class="service-name">Monitoring Dashboard</div>
+                            <div class="service-status status-up">Operational</div>
+                        </div>
+                        <div class="service-desc">
+                            Real-time monitoring dashboard for security events, alerts, and system status.
+                        </div>
+                    </div>
+                    <div class="service-card">
+                        <div class="service-header">
+                            <div class="service-name">Authentication Service</div>
+                            <div class="service-status status-up">Operational</div>
+                        </div>
+                        <div class="service-desc">
+                            API authentication and authorization service. Handles API key validation and access control.
+                        </div>
+                    </div>
+                    <div class="service-card">
+                        <div class="service-header">
+                            <div class="service-name">Data Storage</div>
+                            <div class="service-status status-up">Operational</div>
+                        </div>
+                        <div class="service-desc">
+                            Secure storage for scan results, logs, and threat data. 99.9% uptime SLA.
+                        </div>
+                    </div>
+                    <div class="service-card">
+                        <div class="service-header">
+                            <div class="service-name">Notification System</div>
+                            <div class="service-status status-down">Degraded</div>
+                        </div>
+                        <div class="service-desc">
+                            Alert notification system (email, webhook, Slack). Currently experiencing delays in email delivery.
+                        </div>
+                    </div>
+                </div>
+
+                <div class="api-keys">
+                    <h3>Your API Keys</h3>
+                    <div class="api-key-item">
+                        <div class="key-info">
+                            <h4>Primary Key</h4>
+                            <p>Full access to all API endpoints</p>
+                        </div>
+                        <div class="key-value">ahp_live_sk_7a9b3c2d1e5f8g6h4i0j</div>
+                    </div>
+                    <div class="api-key-item">
+                        <div class="key-info">
+                            <h4>Test Key</h4>
+                            <p>Limited access for testing purposes</p>
+                        </div>
+                        <div class="key-value">ahp_test_sk_2d3f4a5b6c7e8d9f0a1b</div>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <!-- Footer -->
+    <footer>
+        <div class="footer-content">
+            <div class="footer-links">
+                <a href="#">Privacy Policy</a>
+                <a href="#">Terms of Service</a>
+                <a href="#">Security</a>
+                <a href="#">Contact Us</a>
+                <a href="#">Support</a>
+            </div>
+            <div class="copyright">
+                &copy; 2023 Agentic Honeypot AI Security Platform. All rights reserved.
+            </div>
+        </div>
+    </footer>
 
     <script>
-        // ==================== LOCAL MOCK API SERVICE ====================
-        // This simulates API responses without needing a separate server
-        
-        class MockAPIService {
-            constructor() {
-                this.baseURL = 'http://localhost:3001';
-                this.isLocalServerRunning = false;
-                this.checkLocalServer();
-            }
+        // ==================== MAIN APPLICATION CODE ====================
+        document.addEventListener('DOMContentLoaded', function() {
+            // Navigation functionality
+            const navLinks = document.querySelectorAll('nav a');
+            const pages = document.querySelectorAll('.page-content');
             
-            async checkLocalServer() {
-                try {
-                    const response = await fetch(`${this.baseURL}/v1/status`, { 
-                        method: 'GET',
-                        signal: AbortSignal.timeout(1000) // 1 second timeout
-                    });
-                    this.isLocalServerRunning = response.ok;
-                } catch (error) {
-                    this.isLocalServerRunning = false;
-                }
-            }
-            
-            async scan(requestData) {
-                // If local server is running, use it
-                if (this.isLocalServerRunning) {
-                    return this.callRealAPI('/v1/scan', 'POST', requestData);
+            function switchPage(pageId) {
+                // Hide all pages
+                pages.forEach(page => {
+                    page.classList.remove('active');
+                });
+                
+                // Show the selected page
+                const activePage = document.getElementById(pageId);
+                if (activePage) {
+                    activePage.classList.add('active');
                 }
                 
-                // Otherwise, return mock data
-                return new Promise(resolve => {
-                    setTimeout(() => {
-                        resolve({
-                            status: 'success',
-                            scan_id: `scan_mock_${Date.now()}_${Math.floor(Math.random() * 1000)}`,
-                            timestamp: new Date().toISOString(),
-                            threats_detected: Math.floor(Math.random() * 5),
-                            results: {
-                                sql_injection: Math.random() > 0.7,
-                                xss: Math.random() > 0.7,
-                                csrf: Math.random() > 0.7,
-                                rate_limit_violation: Math.random() > 0.8,
-                                data_exfiltration: Math.random() > 0.9
-                            },
-                            security_score: Math.floor(Math.random() * 30) + 70,
-                            recommendations: [
-                                "Implement parameterized queries to prevent SQL injection",
-                                "Add CSRF tokens to all forms",
-                                "Enable rate limiting on sensitive endpoints",
-                                "Use Content Security Policy headers"
-                            ],
-                            response_time_ms: Math.floor(Math.random() * 200) + 100,
-                            note: "Using mock data. Start local server for real API calls."
-                        });
-                    }, 800);
+                // Update navigation links
+                navLinks.forEach(link => {
+                    link.classList.remove('active');
+                });
+                
+                // Activate the clicked navigation link
+                const activeNavLink = document.getElementById(`nav-${pageId.replace('-page', '')}`);
+                if (activeNavLink) {
+                    activeNavLink.classList.add('active');
+                }
+                
+                // Special handling for API test page
+                if (pageId === 'api-test-page') {
+                    showServerStatusIndicator();
+                }
+                
+                // Special handling for documentation page
+                if (pageId === 'documentation-page') {
+                    setupDocumentationNav();
+                }
+            }
+            
+            // Add click event listeners to navigation links
+            navLinks.forEach(link => {
+                link.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    
+                    const linkId = this.id;
+                    const pageMap = {
+                        'nav-dashboard': 'dashboard-page',
+                        'nav-api-test': 'api-test-page',
+                        'nav-documentation': 'documentation-page',
+                        'nav-api-online': 'api-online-page',
+                        'nav-get-started': 'api-online-page'
+                    };
+                    
+                    const pageId = pageMap[linkId];
+                    if (pageId) {
+                        switchPage(pageId);
+                        window.scrollTo({ top: 0, behavior: 'smooth' });
+                    }
+                });
+            });
+            
+            // Documentation navigation setup
+            function setupDocumentationNav() {
+                const docsNavLinks = document.querySelectorAll('.docs-nav-link');
+                docsNavLinks.forEach(link => {
+                    link.addEventListener('click', function(e) {
+                        e.preventDefault();
+                        
+                        docsNavLinks.forEach(lnk => lnk.classList.remove('active'));
+                        this.classList.add('active');
+                        
+                        const targetId = this.getAttribute('href').substring(1);
+                        const targetSection = document.getElementById(targetId);
+                        
+                        if (targetSection) {
+                            targetSection.scrollIntoView({ behavior: 'smooth' });
+                        }
+                    });
                 });
             }
             
-            async callRealAPI(endpoint, method, data) {
-                try {
-                    const response = await fetch(`${this.baseURL}${endpoint}`, {
-                        method: method,
-                        headers: {
-                            'Content-Type': 'application/json',
-                            'X-API-Source': 'AgenticHoneypot-UI'
-                        },
-                        body: JSON.stringify(data)
-                    });
-                    
-                    if (!response.ok) {
-                        throw new Error(`API Error: ${response.status}`);
-                    }
-                    
-                    return await response.json();
-                } catch (error) {
-                    console.error('API call failed:', error);
-                    throw error;
-                }
-            }
-        }
-        
-        // Initialize the mock API service
-        const apiService = new MockAPIService();
-        
-        // ==================== UPDATED API TEST FUNCTIONALITY ====================
-        document.addEventListener('DOMContentLoaded', function() {
-            // ... (your existing navigation code) ...
-            
-            // Update API endpoint field to use localhost
-            const apiEndpointField = document.getElementById('api-endpoint');
-            if (apiEndpointField) {
-                apiEndpointField.value = 'http://localhost:3001/v1/scan';
-            }
-            
-            // Enhanced API test button handler
+            // ==================== API TEST FUNCTIONALITY ====================
             const testApiBtn = document.getElementById('test-api-btn');
             const clearFormBtn = document.getElementById('clear-form-btn');
             const apiResponseContainer = document.getElementById('api-response-container');
             const apiResponse = document.getElementById('api-response');
+            const startServerBtn = document.getElementById('start-server-btn');
             
+            // Show server status indicator
+            async function showServerStatusIndicator() {
+                const statusIndicator = document.getElementById('server-status-indicator');
+                if (statusIndicator) {
+                    // Check server status
+                    await checkServerStatus();
+                    
+                    // Check every 5 seconds
+                    setInterval(checkServerStatus, 5000);
+                }
+            }
+            
+            async function checkServerStatus() {
+                try {
+                    // Create a timeout promise
+                    const timeoutPromise = new Promise((_, reject) => 
+                        setTimeout(() => reject(new Error('Timeout')), 1500)
+                    );
+                    
+                    // Try to fetch server status
+                    const fetchPromise = fetch('http://localhost:3001/v1/status', { 
+                        method: 'GET',
+                        mode: 'no-cors'
+                    }).catch(() => { throw new Error('Server not reachable'); });
+                    
+                    await Promise.race([fetchPromise, timeoutPromise]);
+                    
+                    // If we get here, server is running
+                    updateServerStatus(true);
+                    return true;
+                } catch (error) {
+                    // Server is not running
+                    updateServerStatus(false);
+                    return false;
+                }
+            }
+            
+            function updateServerStatus(isRunning) {
+                const statusDot = document.getElementById('server-status-dot');
+                const statusText = document.getElementById('server-status-text');
+                
+                if (statusDot && statusText) {
+                    if (isRunning) {
+                        statusDot.className = 'status-dot online';
+                        statusText.textContent = 'Running';
+                    } else {
+                        statusDot.className = 'status-dot offline';
+                        statusText.textContent = 'Not Running';
+                    }
+                }
+            }
+            
+            // Start server guide button
+            if (startServerBtn) {
+                startServerBtn.addEventListener('click', function() {
+                    alert('🔧 To start the local API server:\n\n1. Create a file named "server.js" in your project root\n2. Copy the server code provided\n3. Run: npm install express cors\n4. Run: node server.js\n\n📡 Server will start on http://localhost:3001\n\n💡 The API will work with mock data even without the server.');
+                });
+            }
+            
+            // API Test button handler
             if (testApiBtn) {
                 testApiBtn.addEventListener('click', async function() {
                     const endpoint = document.getElementById('api-endpoint').value;
@@ -133,26 +1358,36 @@
                             try {
                                 requestData = JSON.parse(bodyText);
                             } catch (e) {
-                                throw new Error('Invalid JSON in request body');
+                                throw new Error('Invalid JSON in request body. Please check your JSON syntax.');
                             }
                         }
                         
+                        let responseData;
+                        
                         // Check if it's a localhost endpoint
                         if (endpoint.includes('localhost') || endpoint.includes('127.0.0.1')) {
-                            // Use our mock API service
-                            const response = await apiService.scan(requestData);
-                            displayResponse(response);
-                        } else {
-                            // Try to call external API
-                            let headers = {};
-                            if (headersText.trim()) {
-                                try {
-                                    headers = JSON.parse(headersText);
-                                } catch (e) {
-                                    console.warn('Invalid headers JSON');
+                            // Try to call the real API first
+                            try {
+                                const headers = parseHeaders(headersText);
+                                const response = await fetch(endpoint, {
+                                    method: method,
+                                    headers: headers,
+                                    body: ['POST', 'PUT', 'PATCH'].includes(method) ? JSON.stringify(requestData) : null
+                                });
+                                
+                                if (!response.ok) {
+                                    throw new Error(`Server returned ${response.status}: ${response.statusText}`);
                                 }
+                                
+                                responseData = await response.json();
+                            } catch (apiError) {
+                                // If real API fails, use mock data
+                                console.log('Using mock data:', apiError.message);
+                                responseData = await generateMockResponse(requestData);
                             }
-                            
+                        } else {
+                            // For external APIs
+                            const headers = parseHeaders(headersText);
                             const response = await fetch(endpoint, {
                                 method: method,
                                 headers: headers,
@@ -163,9 +1398,10 @@
                                 throw new Error(`API returned ${response.status}: ${response.statusText}`);
                             }
                             
-                            const responseData = await response.json();
-                            displayResponse(responseData);
+                            responseData = await response.json();
                         }
+                        
+                        displayResponse(responseData);
                         
                     } catch (error) {
                         console.error('API test failed:', error);
@@ -175,7 +1411,9 @@
                             status: 'error',
                             message: error.message,
                             timestamp: new Date().toISOString(),
-                            suggestion: 'Try using the local mock API at http://localhost:3001/v1/scan'
+                            suggestion: endpoint.includes('localhost') 
+                                ? 'Make sure the local server is running or the API will use mock data.' 
+                                : 'Check your API endpoint and network connection.'
                         };
                         
                         displayResponse(errorResponse);
@@ -185,9 +1423,58 @@
                         testApiBtn.disabled = false;
                         
                         // Scroll to response
-                        apiResponseContainer.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+                        apiResponseContainer.scrollIntoView({ behavior: 'smooth', block: 'start' });
                     }
                 });
+            }
+            
+            function parseHeaders(headersText) {
+                let headers = { 'Content-Type': 'application/json' };
+                if (headersText.trim()) {
+                    try {
+                        const parsed = JSON.parse(headersText);
+                        headers = { ...headers, ...parsed };
+                    } catch (e) {
+                        console.warn('Invalid headers JSON, using default headers');
+                    }
+                }
+                return headers;
+            }
+            
+            async function generateMockResponse(requestData) {
+                // Simulate API delay
+                await new Promise(resolve => setTimeout(resolve, 800));
+                
+                const threats = Math.floor(Math.random() * 5);
+                const score = Math.floor(Math.random() * 30) + 70;
+                
+                return {
+                    status: 'success',
+                    scan_id: `scan_mock_${Date.now()}_${Math.floor(Math.random() * 1000)}`,
+                    timestamp: new Date().toISOString(),
+                    threats_detected: threats,
+                    results: {
+                        sql_injection: Math.random() > 0.7,
+                        xss: Math.random() > 0.7,
+                        csrf: Math.random() > 0.7,
+                        rate_limit_violation: Math.random() > 0.8,
+                        data_exfiltration: Math.random() > 0.9
+                    },
+                    security_score: score,
+                    risk_level: score > 85 ? 'Low' : score > 70 ? 'Medium' : 'High',
+                    recommendations: threats > 0 ? [
+                        "Implement parameterized queries to prevent SQL injection",
+                        "Add CSRF tokens to all forms",
+                        "Enable rate limiting on sensitive endpoints",
+                        "Use Content Security Policy headers"
+                    ] : [
+                        "Maintain current security practices",
+                        "Regular security audits recommended",
+                        "Keep all dependencies updated"
+                    ],
+                    response_time_ms: Math.floor(Math.random() * 200) + 100,
+                    note: "⚠️ This is mock data. Start local server for real API responses."
+                };
             }
             
             function displayResponse(data) {
@@ -199,7 +1486,7 @@
                     apiResponse.style.color = '#f44336';
                     apiResponse.style.borderLeft = '4px solid #f44336';
                 } else {
-                    apiResponse.style.color = '';
+                    apiResponse.style.color = '#333';
                     apiResponse.style.borderLeft = '4px solid #4caf50';
                 }
             }
@@ -217,135 +1504,24 @@
                 });
             }
             
-            // Add server status indicator
-            const addServerStatusIndicator = () => {
-                const apiTestHeader = document.querySelector('#api-test-page .page-header');
-                if (apiTestHeader) {
-                    const statusIndicator = document.createElement('div');
-                    statusIndicator.className = 'status-indicator';
-                    statusIndicator.id = 'server-status-indicator';
-                    statusIndicator.innerHTML = `
-                        <div class="status-dot" id="server-status-dot"></div>
-                        <span>Local Server: <strong id="server-status-text">Checking...</strong></span>
-                        <button id="start-server-btn" style="margin-left: 15px; padding: 5px 10px; background: #00bcd4; color: white; border: none; border-radius: 4px; cursor: pointer;">
-                            <i class="fas fa-server"></i> Start Mock Server
-                        </button>
-                    `;
-                    apiTestHeader.appendChild(statusIndicator);
-                    
-                    // Check server status periodically
-                    setInterval(async () => {
-                        try {
-                            const response = await fetch('http://localhost:3001/v1/status', { 
-                                method: 'GET',
-                                signal: AbortSignal.timeout(1000)
-                            });
-                            if (response.ok) {
-                                document.getElementById('server-status-dot').className = 'status-dot online';
-                                document.getElementById('server-status-text').textContent = 'Running';
-                                apiService.isLocalServerRunning = true;
-                            }
-                        } catch (error) {
-                            document.getElementById('server-status-dot').className = 'status-dot offline';
-                            document.getElementById('server-status-text').textContent = 'Not Running';
-                            apiService.isLocalServerRunning = false;
-                        }
-                    }, 5000);
-                    
-                    // Start server button
-                    document.getElementById('start-server-btn').addEventListener('click', function() {
-                        alert('To start the local server:\n\n1. Create a file named "server.js" with the provided code\n2. Run: npm install express cors\n3. Run: node server.js\n\nCheck the console for instructions.');
-                    });
-                }
-            };
+            // ==================== OTHER FUNCTIONALITY ====================
             
-            // Add server status indicator when on API test page
-            const apiTestLink = document.getElementById('nav-api-test');
-            if (apiTestLink) {
-                apiTestLink.addEventListener('click', function() {
-                    setTimeout(addServerStatusIndicator, 100);
-                });
+            // Update "last updated" time on API Online page
+            function updateLastUpdated() {
+                const lastUpdatedElement = document.getElementById('last-updated');
+                if (lastUpdatedElement) {
+                    const now = new Date();
+                    lastUpdatedElement.textContent = now.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
+                }
             }
+            
+            // Update time initially and every minute
+            updateLastUpdated();
+            setInterval(updateLastUpdated, 60000);
+            
+            // Initial setup for documentation page
+            setupDocumentationNav();
         });
     </script>
-    // Add this JavaScript at the end of your HTML file, before closing </body>
-<script>
-// Inline mock API using Service Workers (works without Node.js)
-if ('serviceWorker' in navigator) {
-    // Register a service worker to intercept API calls
-    navigator.serviceWorker.register('/sw.js').catch(console.error);
-}
-
-// Fallback: Mock API function that runs in the browser
-window.mockAPI = {
-    scan: function(data) {
-        return new Promise(resolve => {
-            setTimeout(() => {
-                resolve({
-                    status: 'success',
-                    scan_id: `scan_${Date.now()}_${Math.floor(Math.random() * 1000)}`,
-                    timestamp: new Date().toISOString(),
-                    threats_detected: Math.floor(Math.random() * 5),
-                    results: {
-                        sql_injection: Math.random() > 0.7,
-                        xss: Math.random() > 0.7,
-                        csrf: Math.random() > 0.7,
-                        rate_limit_violation: Math.random() > 0.8,
-                        data_exfiltration: Math.random() > 0.9
-                    },
-                    security_score: Math.floor(Math.random() * 30) + 70,
-                    recommendations: [
-                        "Implement parameterized queries",
-                        "Add CSRF tokens to forms",
-                        "Enable rate limiting on sensitive endpoints"
-                    ],
-                    response_time_ms: Math.floor(Math.random() * 200) + 100
-                });
-            }, 800);
-        });
-    }
-};
-
-// Update the API test button handler to use the mock API
-document.getElementById('test-api-btn').addEventListener('click', async function() {
-    const endpoint = document.getElementById('api-endpoint').value;
-    
-    // If it's trying to call localhost:3001, use our mock API instead
-    if (endpoint.includes('localhost:3001') || endpoint.includes('127.0.0.1:3001')) {
-        const btn = this;
-        const originalText = btn.innerHTML;
-        btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Testing API...';
-        btn.disabled = true;
-        
-        try {
-            const bodyText = document.getElementById('request-body').value;
-            let requestData = {};
-            
-            if (bodyText.trim()) {
-                try {
-                    requestData = JSON.parse(bodyText);
-                } catch (e) {
-                    requestData = { url: 'https://example.com' };
-                }
-            }
-            
-            const response = await window.mockAPI.scan(requestData);
-            
-            // Display response
-            document.getElementById('api-response').textContent = JSON.stringify(response, null, 2);
-            document.getElementById('api-response-container').style.display = 'block';
-        } catch (error) {
-            console.error('Mock API error:', error);
-        } finally {
-            btn.innerHTML = originalText;
-            btn.disabled = false;
-            document.getElementById('api-response-container').scrollIntoView({ behavior: 'smooth' });
-        }
-    } else {
-        // Original fetch code for external APIs
-        // ... (your existing fetch code)
-    }
-});
-</script>
 </body>
 </html>
