@@ -32,18 +32,21 @@ export default function ScamDetector() {
       // Show API request format
       console.log('Sending request:', { text })
       
-      const response = await axios.post('http://localhost:8000/detect', {
+      const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://127.0.0.1:5001'
+      const response = await axios.post(`${apiUrl}/detect`, {
         text: text
       }, {
         headers: {
           'Content-Type': 'application/json'
-        }
+        },
+        timeout: 5000
       })
       
       console.log('Received response:', response.data)
       setResult(response.data)
     } catch (err: any) {
-      setError(err.response?.data?.detail || 'Failed to detect scam. Make sure backend is running on port 8000.')
+      const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://127.0.0.1:5001'
+      setError(err.response?.data?.detail || `Failed to detect scam. Ensure backend API is running at ${apiUrl}`)
       console.error('Detection error:', err)
     } finally {
       setLoading(false)

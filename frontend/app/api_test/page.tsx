@@ -24,28 +24,34 @@ export default function ApiTestPage() {
   const [serverStatus, setServerStatus] = useState<ServerStatus>({ flask: false, simple: false });
   const [activeMode, setActiveMode] = useState<'both' | 'flask' | 'simple'>('both');
 
+  // Get API URLs from environment variables
+  const FLASK_API = typeof window !== 'undefined' ? 
+    (window.location.origin === 'http://localhost:3001' ? 'http://127.0.0.1:5001' : 'http://127.0.0.1:5001') 
+    : 'http://127.0.0.1:5001';
+  const SIMPLE_API = 'http://127.0.0.1:5002';
+
   // Available endpoints for both servers
   const endpoints = {
     flask: [
-      { name: 'Health Check', path: 'http://localhost:5001/api/health', description: 'Comprehensive health status' },
-      { name: 'Server Status', path: 'http://localhost:5001/api/status', description: 'Detailed server metrics' },
-      { name: 'Run Test', path: 'http://localhost:5001/api/test?type=advanced&delay=0.5', description: 'Configurable test' },
-      { name: 'Get Metrics', path: 'http://localhost:5001/api/metrics', description: 'Performance metrics' },
-      { name: 'Simulate Delay', path: 'http://localhost:5001/api/simulation/delay', description: 'Delay simulation' },
+      { name: 'Health Check', path: `${FLASK_API}/api/health`, description: 'Comprehensive health status' },
+      { name: 'Server Status', path: `${FLASK_API}/api/status`, description: 'Detailed server metrics' },
+      { name: 'Run Test', path: `${FLASK_API}/api/test?type=advanced&delay=0.5`, description: 'Configurable test' },
+      { name: 'Get Metrics', path: `${FLASK_API}/api/metrics`, description: 'Performance metrics' },
+      { name: 'Simulate Delay', path: `${FLASK_API}/api/simulation/delay`, description: 'Delay simulation' },
     ],
     simple: [
-      { name: 'Health Check', path: 'http://localhost:5002/api/health', description: 'Basic health status' },
-      { name: 'Quick Test', path: 'http://localhost:5002/api/quick-test', description: 'Fast performance test' },
-      { name: 'Ping', path: 'http://localhost:5002/api/ping', description: 'Simple ping/pong' },
-      { name: 'Server Info', path: 'http://localhost:5002/api/info', description: 'Server information' },
+      { name: 'Health Check', path: `${SIMPLE_API}/api/health`, description: 'Basic health status' },
+      { name: 'Quick Test', path: `${SIMPLE_API}/api/quick-test`, description: 'Fast performance test' },
+      { name: 'Ping', path: `${SIMPLE_API}/api/ping`, description: 'Simple ping/pong' },
+      { name: 'Server Info', path: `${SIMPLE_API}/api/info`, description: 'Server information' },
     ]
   };
 
   // Check server availability
   const checkServers = async () => {
     const checks = [
-      { name: 'flask', url: 'http://localhost:5001/api/health' },
-      { name: 'simple', url: 'http://localhost:5002/api/health' }
+      { name: 'flask', url: `${FLASK_API}/api/health` },
+      { name: 'simple', url: `${SIMPLE_API}/api/health` }
     ];
 
     const status: ServerStatus = { flask: false, simple: false };

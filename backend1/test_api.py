@@ -6,7 +6,7 @@ import time
 
 def test_apis():
     """Test all API endpoints"""
-    base_url = "http://localhost:8000"
+    base_url = "http://localhost:8001"
     
     print("="*60)
     print("🧪 API TESTING")
