@@ -18,4 +18,6 @@ nltk==3.8.1
 phonenumbers==8.13.22
 email-validator==2.1.0
 requests==2.31.0
-#hello friends..........SUI........
+flask==2.3.3
+flask-cors==4.0.0
+python-dotenv==1.0.0

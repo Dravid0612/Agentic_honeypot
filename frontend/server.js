@@ -1,75 +1,50 @@
-// server.js - Place this in the ROOT directory
 const express = require('express');
 const cors = require('cors');
-const path = require('path');
 const app = express();
-const port = 3001;
+const PORT = 3000;
 
-app.use(cors());
+// ✅ CRITICAL: Enable CORS
+app.use(cors({
+    origin: '*', // Allow all origins
+    methods: ['GET', 'POST', 'PUT', 'DELETE'],
+    allowedHeaders: ['Content-Type', 'Authorization']
+}));
+
 app.use(express.json());
-app.use(express.static(path.join(__dirname, 'public')));
 
-// Mock API endpoints
-app.post('/v1/scan', (req, res) => {
-    console.log('📡 Received scan request:', req.body);
-    
-    setTimeout(() => {
-        const threats = Math.floor(Math.random() * 5);
-        const score = Math.floor(Math.random() * 30) + 70;
-        
-        res.json({
-            status: 'success',
-            scan_id: `scan_${Date.now()}_${Math.floor(Math.random() * 1000)}`,
-            timestamp: new Date().toISOString(),
-            threats_detected: threats,
-            results: {
-                sql_injection: Math.random() > 0.7,
-                xss: Math.random() > 0.7,
-                csrf: Math.random() > 0.7,
-                rate_limit_violation: Math.random() > 0.8,
-                data_exfiltration: Math.random() > 0.9
-            },
-            security_score: score,
-            risk_level: score > 85 ? 'Low' : score > 70 ? 'Medium' : 'High',
-            recommendations: threats > 0 ? [
-                "Implement parameterized queries",
-                "Add CSRF tokens to forms",
-                "Enable rate limiting on sensitive endpoints"
-            ] : [
-                "Maintain current security practices",
-                "Regular security audits recommended"
-            ],
-            response_time_ms: Math.floor(Math.random() * 200) + 100
-        });
-    }, 800);
-});
+// ✅ Serve static files from current directory
+app.use(express.static(__dirname));
 
-app.get('/v1/status', (req, res) => {
+// ✅ API Endpoint
+app.post('/api/scan', (req, res) => {
+    console.log('✅ API called successfully');
     res.json({
-        status: 'operational',
-        version: '1.0.0',
-        uptime: process.uptime(),
-        timestamp: new Date().toISOString(),
-        services: {
-            scanning: 'online',
-            database: 'online',
-            monitoring: 'online'
-        }
+        status: 'success',
+        scan_id: `scan_${Date.now()}`,
+        message: 'API connected successfully!',
+        threats: Math.floor(Math.random() * 5),
+        timestamp: new Date().toISOString()
     });
 });
 
-app.get('/health', (req, res) => {
-    res.json({ status: 'healthy', service: 'Agentic Honeypot API' });
+// ✅ Health check
+app.get('/api/health', (req, res) => {
+    res.json({ status: 'healthy', server: 'running' });
 });
 
-// Serve index.html for all other routes
+// ✅ Test endpoint
+app.get('/api/test', (req, res) => {
+    res.json({ message: 'Server is working!' });
+});
+
+// ✅ Serve HTML for all routes
 app.get('*', (req, res) => {
-    res.sendFile(path.join(__dirname, 'public', 'index.html'));
+    res.sendFile(__dirname + '/index.html');
 });
 
-app.listen(port, () => {
-    console.log(`🚀 Server running at http://localhost:${port}`);
-    console.log(`📡 Frontend: http://localhost:${port}`);
-    console.log(`🔌 API: http://localhost:${port}/v1/scan`);
-    console.log(`📊 Status: http://localhost:${port}/v1/status`);
+app.listen(PORT, () => {
+    console.log(`✅ Server running: http://localhost:${PORT}`);
+    console.log(`✅ API: http://localhost:${PORT}/api/scan`);
+    console.log(`✅ Test: http://localhost:${PORT}/api/test`);
+    console.log('✅ Open above URL in browser');
 });
