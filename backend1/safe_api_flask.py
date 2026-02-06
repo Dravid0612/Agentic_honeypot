@@ -1,3 +1,9 @@
+@app.route('/', methods=['GET', 'POST'])
+def root():
+    return jsonify({
+        "message": "Agentic Honeypot API Root. Use /api/health or see documentation for available endpoints.",
+        "status": "ok"
+    })
 from flask import Flask, jsonify, request
 from flask_cors import CORS
 from datetime import datetime
