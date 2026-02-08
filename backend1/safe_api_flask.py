@@ -1,9 +1,3 @@
-@app.route('/', methods=['GET', 'POST'])
-def root():
-    return jsonify({
-        "message": "Agentic Honeypot API Root. Use /api/health or see documentation for available endpoints.",
-        "status": "ok"
-    })
 from flask import Flask, jsonify, request
 from flask_cors import CORS
 from datetime import datetime
@@ -36,7 +30,8 @@ def health_check():
             "cors_enabled",
             "json_responses",
             "rate_limit_simulation",
-            "mock_data_generation"
+            "mock_data_generation",
+            "guvi_honeypot"
         ],
         "endpoints": {
             "/api/health": "Health status",
@@ -44,7 +39,10 @@ def health_check():
             "/api/version": "Version information",
             "/api/test": "Run a safe test",
             "/api/metrics": "Performance metrics",
-            "/api/simulation/<type>": "Data simulation endpoints"
+            "/api/simulation/<type>": "Data simulation endpoints",
+            "/api/reset": "Reset test data",
+            "/api/guvi-honeypot": "GUVI honeypot mock endpoint",
+            "/api/guvi-honeypot/health": "GUVI health check"
         }
     })
 
@@ -99,7 +97,8 @@ def version_info():
             "Mock data generation",
             "Performance simulation",
             "Error simulation",
-            "Rate limit simulation"
+            "Rate limit simulation",
+            "GUVI honeypot simulation"
         ],
         "limitations": [
             "Read-only operations",
@@ -236,13 +235,148 @@ def reset_tests():
         "timestamp": datetime.now().isoformat()
     })
 
+@app.route('/api/guvi-honeypot', methods=['POST', 'GET', 'OPTIONS'])
+def guvi_honeypot_mock():
+    """Mock endpoint for GUVI honeypot testing with better CORS"""
+    
+    # Handle OPTIONS for CORS preflight
+    if request.method == 'OPTIONS':
+        response = jsonify({'status': 'ok'})
+        response.headers.add('Access-Control-Allow-Origin', '*')
+        response.headers.add('Access-Control-Allow-Headers', 'x-api-key, Content-Type')
+        response.headers.add('Access-Control-Allow-Methods', 'GET, POST, OPTIONS')
+        return response
+    
+    # Check for required headers
+    api_key = request.headers.get('x-api-key')
+    
+    if not api_key:
+        response = jsonify({
+            "error": "Missing required header: x-api-key",
+            "status": "failed",
+            "timestamp": datetime.now().isoformat()
+        })
+        response.headers.add('Access-Control-Allow-Origin', '*')
+        return response, 400
+    
+    # Validate API key (accept both versions)
+    valid_keys = ["GUVI-Agentic_honeypot_123456", "GUVi-password1two8"]
+    
+    if api_key not in valid_keys:
+        response = jsonify({
+            "error": "Invalid API key",
+            "status": "failed",
+            "timestamp": datetime.now().isoformat()
+        })
+        response.headers.add('Access-Control-Allow-Origin', '*')
+        return response, 401
+    
+    # Get request data
+    if request.method == 'GET':
+        data = request.args.to_dict()
+    else:
+        data = request.json or {}
+    
+    # Simple response for GUVI tester
+    response_data = {
+        "status": "success",
+        "message": "Honeypot endpoint is working correctly",
+        "data": {
+            "request_id": f"req_{random.randint(10000, 99999)}",
+            "timestamp": datetime.now().isoformat(),
+            "endpoint_tested": data.get('endpoint', 'api/guvi-honeypot'),
+            "security_level": "high",
+            "threats_detected": []
+        },
+        "test_results": {
+            "api_authenticity": "PASS",
+            "endpoint_availability": "PASS", 
+            "request_handling": "PASS",
+            "response_status": "PASS",
+            "basic_honeypot": "PASS"
+        }
+    }
+    
+    response = jsonify(response_data)
+    response.headers.add('Access-Control-Allow-Origin', '*')
+    response.headers.add('Content-Type', 'application/json')
+    
+    return response
+
+@app.route('/api/guvi-honeypot/health', methods=['GET', 'OPTIONS'])
+def guvi_honeypot_health():
+    """Health check for GUVI honeypot endpoint with CORS"""
+    if request.method == 'OPTIONS':
+        response = jsonify({'status': 'ok'})
+        response.headers.add('Access-Control-Allow-Origin', '*')
+        response.headers.add('Access-Control-Allow-Headers', '*')
+        response.headers.add('Access-Control-Allow-Methods', 'GET, OPTIONS')
+        return response
+    
+    response = jsonify({
+        "status": "healthy",
+        "service": "guvi-honeypot-api",
+        "version": "1.0.0",
+        "endpoints": {
+            "POST /api/guvi-honeypot": "Test honeypot endpoint",
+            "GET /api/guvi-honeypot": "Test with GET method",
+            "GET /api/guvi-honeypot/health": "Health check"
+        },
+        "required_headers": {
+            "x-api-key": "GUVI-Agentic_honeypot_123456 or GUVi-password1two8"
+        },
+        "cors": "enabled",
+        "timestamp": datetime.now().isoformat()
+    })
+    response.headers.add('Access-Control-Allow-Origin', '*')
+    
+    return response
+@app.route('/', methods=['GET'])
+def root():
+    """Root endpoint with API documentation"""
+    return jsonify({
+        "message": "Agentic Honeypot Flask API",
+        "version": "2.0.0",
+        "endpoints": [
+            {"method": "GET", "path": "/api/health", "description": "Health check"},
+            {"method": "GET", "path": "/api/status", "description": "Server status"},
+            {"method": "GET", "path": "/api/version", "description": "Version info"},
+            {"method": "GET", "path": "/api/test", "description": "Run configurable test"},
+            {"method": "GET", "path": "/api/metrics", "description": "Performance metrics"},
+            {"method": "GET", "path": "/api/reset", "description": "Reset test data"},
+            {"method": "POST/GET", "path": "/api/guvi-honeypot", "description": "GUVI honeypot test"},
+            {"method": "GET", "path": "/api/guvi-honeypot/health", "description": "GUVI health check"}
+        ],
+        "documentation": "Access endpoints with /api/{endpoint_name}",
+        "timestamp": datetime.now().isoformat()
+    })
+
+@app.route('/api', methods=['GET'])
+def api_root():
+    """API root endpoint"""
+    return jsonify({
+        "api": "Agentic Honeypot",
+        "version": "2.0.0",
+        "status": "running",
+        "endpoints": {
+            "/health": "Health check",
+            "/status": "Server status",
+            "/version": "Version information",
+            "/test": "Run configurable test",
+            "/metrics": "Performance metrics",
+            "/reset": "Reset test data",
+            "/guvi-honeypot": "GUVI honeypot test endpoint",
+            "/guvi-honeypot/health": "GUVI health check"
+        }
+    })
+
 if __name__ == '__main__':
     print("=" * 70)
     print("🚀 FLASK SAFE API SERVER")
     print("=" * 70)
     print("Port: 5001")
     print("Mode: Development (Safe)")
-    print("Features: Mock data, Simulations, Metrics, CORS")
+    print("Features: Mock data, Simulations, Metrics, CORS, GUVI Mock")
     print("\n📚 Available Endpoints:")
     print("  GET /api/health              - Health check with features")
     print("  GET /api/status             - Detailed server status")
@@ -251,6 +385,11 @@ if __name__ == '__main__':
     print("  GET /api/metrics            - Performance metrics")
     print("  GET /api/simulation/<type>  - Simulation endpoints")
     print("  GET /api/reset              - Reset test data")
+    print("  POST/GET /api/guvi-honeypot - GUVI honeypot mock endpoint")
+    print("  GET /api/guvi-honeypot/health - GUVI health check")
+    print("\n🔑 GUVI API Keys Accepted:")
+    print("  • GUVI-Agentic_honeypot_123456")
+    print("  • GUVi-password1two8")
     print("\n⚠️  Safety Features:")
     print("  • Read-only operations only")
     print("  • In-memory storage (resets on restart)")
@@ -258,4 +397,4 @@ if __name__ == '__main__':
     print("  • No external dependencies required")
     print("=" * 70)
     
-    app.run(debug=True, port=5001, use_reloader=False)
+    app.run(debug=True, port=5001, host='0.0.0.0', use_reloader=False)

@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>API Test</title>
+</head>
+<body>
+    <h1>Flask API Test</h1>
+    
+    <div>
+        <h2>Test Endpoints:</h2>
+        <button onclick="testHealth()">Test /api/health</button>
+        <button onclick="testGuviHealth()">Test /api/guvi-honeypot/health</button>
+        <button onclick="testGuvi()">Test /api/guvi-honeypot</button>
+    </div>
+    
+    <div id="result" style="margin-top: 20px; padding: 10px; border: 1px solid #ccc;"></div>
+    
+    <script>
+        async function testHealth() {
+            try {
+                const response = await fetch('http://localhost:5001/api/health');
+                const data = await response.json();
+                document.getElementById('result').innerHTML = 
+                    `<pre>${JSON.stringify(data, null, 2)}</pre>`;
+            } catch (error) {
+                document.getElementById('result').innerHTML = 
+                    `Error: ${error.message}`;
+            }
+        }
+        
+        async function testGuviHealth() {
+            try {
+                const response = await fetch('http://localhost:5001/api/guvi-honeypot/health');
+                const data = await response.json();
+                document.getElementById('result').innerHTML = 
+                    `<pre>${JSON.stringify(data, null, 2)}</pre>`;
+            } catch (error) {
+                document.getElementById('result').innerHTML = 
+                    `Error: ${error.message}`;
+            }
+        }
+        
+        async function testGuvi() {
+            try {
+                const response = await fetch('http://localhost:5001/api/guvi-honeypot', {
+                    method: 'POST',
+                    headers: {
+                        'x-api-key': 'GUVi-password1two8',
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({test: 'honeypot'})
+                });
+                const data = await response.json();
+                document.getElementById('result').innerHTML = 
+                    `<pre>${JSON.stringify(data, null, 2)}</pre>`;
+            } catch (error) {
+                document.getElementById('result').innerHTML = 
+                    `Error: ${error.message}`;
+            }
+        }
+    </script>
+</body>
+</html>

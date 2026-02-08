@@ -4,6 +4,43 @@ import Dashboard from './components/Dashboard';
 import Analytics from './components/Analytics';
 import { API_BASE_URL, API_KEY } from './apiConfig';
 import './styles/main.css';
+import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
+import AdvisorDashboard from './components/AdvisorDashboard/AdvisorDashboard';
+
+function App() {
+  return (
+    <BrowserRouter>
+      <Routes>
+        <Route path="/" element={<Home />} />
+        <Route path="/login" element={<Login />} />
+        <Route path="/student-dashboard" element={<StudentDashboard />} />
+        
+        {/* New Advisor Route */}
+        <Route path="/advisor-dashboard" element={
+          <ProtectedRoute role="advisor">
+            <AdvisorDashboard />
+          </ProtectedRoute>
+        } />
+      </Routes>
+    </BrowserRouter>
+  );
+}
+
+// Protected Route Component
+const ProtectedRoute = ({ children, role }) => {
+  const user = auth.currentUser;
+  
+  if (!user) {
+    return <Navigate to="/login" />;
+  }
+  
+  // Check user role from Firebase
+  if (role && user.role !== role) {
+    return <Navigate to="/" />;
+  }
+  
+  return children;
+};
 
 function App() {
   const [activeTab, setActiveTab] = useState('chat');
